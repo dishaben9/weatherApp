@@ -17,7 +17,6 @@ const HomeScreen = ({navigation}) => {
   const [weatherData, setWeatherData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const dispatch = useDispatch();
-
   useEffect(() => {
     dispatch(getCities())
       .then(res => {
@@ -50,14 +49,14 @@ const HomeScreen = ({navigation}) => {
         }}>
         <View style={styles.cityContainer}>
           <View>
-            <Text style={{...FONTS.robotoMedium, fontSize: 20}}>
+            <Text style={{...FONTS.robotoRegular, fontSize: 20}}>
               {item?.name}
             </Text>
             <Text style={{...FONTS.robotoLight, fontSize: 15, marginTop: 15}}>
               {capitalize(item?.weather[0].description)}
             </Text>
           </View>
-          <Text style={{...FONTS.robotoMedium, fontSize: 30}}>
+          <Text style={{...FONTS.robotoRegular, fontSize: 30}}>
             {getTemperature(item?.main?.temp)}
           </Text>
         </View>
@@ -67,7 +66,7 @@ const HomeScreen = ({navigation}) => {
 
   return (
     <View style={styles.mainContainer}>
-      <StatusBar backgroundColor="#184026" />
+      <StatusBar backgroundColor="#184026" barStyle="light-content" />
       {isLoading ? (
         <>
           <View style={styles.loadingImage1}>

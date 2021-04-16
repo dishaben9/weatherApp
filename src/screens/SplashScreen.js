@@ -1,9 +1,13 @@
 import React, {useEffect} from 'react';
 import {View, Text, StyleSheet} from 'react-native';
 import {color, FONTS} from '../helpers/theme';
+import {useDispatch} from 'react-redux';
+import {getLocationData} from '../redux/Actions/WeatherActions';
 
 const SplashScreen = ({navigation}) => {
+  const dispatch = useDispatch();
   useEffect(() => {
+    dispatch(getLocationData()).then().catch();
     setTimeout(() => {
       navigation.navigate('Home');
     }, 3000);

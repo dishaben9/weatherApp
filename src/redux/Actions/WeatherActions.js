@@ -1,5 +1,7 @@
 import axios from 'axios';
-import {STORE_CITIES} from '../Types';
+import {LOCATION, STORE_CITIES} from '../Types';
+import Geolocation from '@react-native-community/geolocation';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 let reqHeader = Object.assign({
   Accept: 'application/json',
@@ -25,5 +27,50 @@ export const getCities = () => {
       .catch(e => {
         return Promise.reject(e);
       });
+  };
+};
+
+export const getCityData = (lat, lon) => {
+  return () => {
+    return axios
+      .get(
+        `http://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=ffb8c3decb6e7b68c36aca2d55c410ac`,
+        reqHeader,
+      )
+      .then(res => {
+        return Promise.resolve(res?.data);
+      })
+      .catch(e => {
+        return Promise.reject(e);
+      });
+  };
+};
+
+export const getLocationData = () => {
+  return dispatch => {
+    return Geolocation.getCurrentPosition(
+      info => {
+        dispatch(getCityData(info?.coords?.latitude, info?.coords?.longitude))
+          .then(res => {
+            dispatch({
+              type: LOCATION,
+              latitude: res?.coord?.lat,
+              longitude: res?.coord?.lon,
+              temperature: res?.data?.main?.temp,
+            });
+            AsyncStorage.setItem(
+              'TEMPERATURE',
+              Math.round(res?.main?.temp - 273.15).toString(),
+            );
+            Promise.resolve(info);
+          })
+          .catch(e => {
+            return Promise.reject(e);
+          });
+      },
+      e => {
+        return Promise.reject(e);
+      },
+    );
   };
 };

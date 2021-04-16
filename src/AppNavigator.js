@@ -15,7 +15,7 @@ const navigationOption = {
   headerTitleStyle: {alignSelf: 'center'},
   headerStyle: {backgroundColor: color.green},
   headerTintColor: color.white,
-};
+}
 
 const MainStackNavigator = () => {
   return (
@@ -34,10 +34,7 @@ const MainStackNavigator = () => {
         <Stack.Screen
           name="CityDetail"
           component={CityDetailScreen}
-          options={{
-            headerLeft: () => {},
-            ...navigationOption,
-          }}
+          options={navigationOption}
         />
       </Stack.Navigator>
     </NavigationContainer>

@@ -1,17 +1,40 @@
-import React from 'react';
-import {View, Image, StyleSheet, Text} from 'react-native';
+import React, {useLayoutEffect} from 'react';
+import {
+  View,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  StatusBar,
+} from 'react-native';
 import {useSelector} from 'react-redux';
 import MapView, {PROVIDER_GOOGLE, Marker} from 'react-native-maps';
-import {FONTS} from '../helpers/theme';
+import {color, FONTS} from '../helpers/theme';
+import Icon from 'react-native-vector-icons/Ionicons';
 
 const CityDetailScreen = ({navigation, route}) => {
   const cityData = useSelector(state => state?.weather?.cityList);
   const city = cityData.find(i => i?.id === route?.params?.cityId);
-  console.log(city);
 
   const getTemperature = kelvin_temp => {
     return Math.round(kelvin_temp - 273.15).toString() + '° C';
   };
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerLeft: () => (
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Icon
+            size={25}
+            color={color.white}
+            name="arrow-back-outline"
+            style={{marginLeft: 20}}
+          />
+        </TouchableOpacity>
+      ),
+      headerTitleAlign: 'center',
+    });
+  }, [navigation]);
 
   const capitalize = s =>
     s
@@ -21,6 +44,7 @@ const CityDetailScreen = ({navigation, route}) => {
 
   return (
     <View style={styles.container}>
+      <StatusBar backgroundColor="#184026" barStyle="light-content" />
       <MapView
         style={{
           width: '100%',
@@ -42,37 +66,30 @@ const CityDetailScreen = ({navigation, route}) => {
           <Image
             source={require('../assets/pointer.png')}
             resizeMode="contain"
-            style={{
-              width: 40,
-              height: 40,
-            }}
+            style={styles.pointer}
           />
-          <Text style={{...FONTS.robotoLight, fontSize: 15}}>{city?.name}</Text>
+          <Text style={{...FONTS.robotoMedium, fontSize: 15}}>
+            {city?.name}
+          </Text>
         </Marker>
       </MapView>
       <View style={{flex: 1, flexDirection: 'row'}}>
-        <View style={{flex: 1, padding: 30}}>
-          <Text style={{...FONTS.robotoBold, fontSize: 30}}>{city?.name}</Text>
-          <Text style={{...FONTS.robotoLight, fontSize: 20, marginTop: 20}}>
+        <View style={styles.leftContainer}>
+          <Text style={styles.text}>{city?.name}</Text>
+          <Text style={[styles.subText, {marginTop: 20}]}>
             {capitalize(city?.weather[0].description)}
           </Text>
-          <Text style={{...FONTS.robotoLight, fontSize: 20, marginTop: 15}}>
-            Humidity: {city?.main?.humidity}
-          </Text>
-          <Text style={{...FONTS.robotoLight, fontSize: 20, marginTop: 15}}>
-            Wind Speed: {city?.wind?.speed}
-          </Text>
-          <Text style={{...FONTS.robotoLight, fontSize: 20, marginTop: 15}}>
+          <Text style={styles.subText}>Humidity: {city?.main?.humidity}</Text>
+          <Text style={styles.subText}>Wind Speed: {city?.wind?.speed}</Text>
+          <Text style={styles.subText}>
             Max. Temp.: {getTemperature(city?.main?.temp_max)}
           </Text>
-          <Text style={{...FONTS.robotoLight, fontSize: 20, marginTop: 15}}>
+          <Text style={styles.subText}>
             Max. Temp.: {getTemperature(city?.main?.temp_min)}
           </Text>
         </View>
-        <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
-          <Text style={{...FONTS.robotoBold, fontSize: 30}}>
-            {getTemperature(city?.main?.temp)}
-          </Text>
+        <View style={styles.rightContainer}>
+          <Text style={styles.text}>{getTemperature(city?.main?.temp)}</Text>
           <View style={styles.weatherImage}>
             <Image
               source={{
@@ -104,6 +121,28 @@ const styles = StyleSheet.create({
     flex: 1,
     height: undefined,
     width: undefined,
+  },
+  subText: {
+    ...FONTS.robotoLight,
+    fontSize: 20,
+    marginTop: 15,
+  },
+  text: {
+    ...FONTS.robotoRegular,
+    fontSize: 30,
+  },
+  rightContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  leftContainer: {
+    flex: 1,
+    padding: 30,
+  },
+  pointer: {
+    width: 40,
+    height: 40,
   },
 });
 

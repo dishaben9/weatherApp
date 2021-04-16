@@ -8,6 +8,7 @@ export const FONTS = {
   robotoBold: {fontFamily: 'Roboto-Bold'},
   robotoMedium: {fontFamily: 'Roboto-Medium'},
   robotoLight: {fontFamily: 'Roboto-Light'},
+  robotoRegular: {fontFamily: 'Roboto-Regular'},
 };
 
 export const wp = x => {
@@ -33,6 +34,4 @@ export const color = {
   green: '#00804A',
 };
 
-const appTheme = {FONTS, wp, hp, color};
-
-export default appTheme;
+export default {FONTS, wp, hp, color};
