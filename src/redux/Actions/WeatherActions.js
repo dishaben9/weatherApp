@@ -48,30 +48,13 @@ export const getCityData = (lat, lon) => {
 };
 
 export const getLocationData = () => {
-  return dispatch => {
-    return Geolocation.getCurrentPosition(
-      info => {
-        dispatch(getCityData(info?.coords?.latitude, info?.coords?.longitude))
-          .then(res => {
-            dispatch({
-              type: LOCATION,
-              latitude: res?.coord?.lat,
-              longitude: res?.coord?.lon,
-              temperature: res?.data?.main?.temp,
-            });
-            AsyncStorage.setItem(
-              'TEMPERATURE',
-              Math.round(res?.main?.temp - 273.15).toString(),
-            );
-            Promise.resolve(info);
-          })
-          .catch(e => {
-            return Promise.reject(e);
-          });
-      },
-      e => {
-        return Promise.reject(e);
-      },
-    );
-  };
+  Geolocation.getCurrentPosition(
+    info => {
+      return info.coords.latitude;
+    },
+    e => {
+      console.log(e);
+      return e;
+    },
+  );
 };

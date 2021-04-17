@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect} from 'react';
 import MainStackNavigator from './src/AppNavigator';
 import AppReducer from './src/redux/Reducers';
 import {persistStore, persistReducer} from 'redux-persist';
@@ -9,7 +9,9 @@ import {createStore, applyMiddleware} from 'redux';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import PushNotification from 'react-native-push-notification';
 import PushNotificationIOS from '@react-native-community/push-notification-ios';
-import {getMessage} from './src/helpers/notificationmessage';
+import firebase from 'react-native-firebase';
+import axios from 'axios';
+import {MAP_API_KEY} from './src/helpers/constants';
 
 const PERSIST_CONFIG = {
   key: 'root',
@@ -52,28 +54,108 @@ PushNotification.configure({
 });
 
 const App = () => {
-  const [message, setMessage] = useState('abc');
-  const sendMessage = () => {
-    PushNotification.localNotification({
-      title: message, // (optional)
-      message: message, // (required)
-      largeIcon: 'ic_cloud',
+  useEffect(() => {
+    checkPermission();
+    messageListener();
+  }, []);
+
+  let messageListener = async () => {
+    const notificationListener = firebase
+      .notifications()
+      .onNotification(notification => {
+        const {title, body} = notification;
+        console.log('1');
+        showAlert(title, body);
+      });
+
+    const notificationOpenedListener = firebase
+      .notifications()
+      .onNotificationOpened(notificationOpen => {
+        const {title, body} = notificationOpen.notification;
+        console.log('2');
+        showAlert(title, body);
+      });
+
+    const notificationOpen = await firebase
+      .notifications()
+      .getInitialNotification();
+    if (notificationOpen) {
+      const {title, body} = notificationOpen.notification;
+      console.log('3');
+      await showAlert(title, body);
+    }
+
+    messageListener = firebase.messaging().onMessage(message => {
+      console.log(JSON.stringify(message));
     });
   };
 
-  useEffect(() => {
-    sendMessage();
-    getMessage().then(res => {
-      setMessage(res);
-    });
-  }, []);
+  const showAlert = async (title, message) => {
+    let latitude = await AsyncStorage.getItem('latitude');
+    let longitude = await AsyncStorage.getItem('longitude');
 
-  PushNotification.localNotificationSchedule({
-    message: message,
-    date: new Date(Date.now() + 60 * 10000), // in 60 Min
-    allowWhileIdle: false,
-    largeIcon: 'ic_cloud',
-  });
+    let reqHeader = Object.assign({
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    });
+
+    if (!latitude || !longitude) {
+      console.log('Unable to get Location');
+    } else {
+      await axios
+        .get(
+          `http://api.openweathermap.org/data/2.5/weather?lat=${parseFloat(
+            latitude,
+          )}&lon=${parseFloat(longitude)}&appid=${MAP_API_KEY}`,
+          reqHeader,
+        )
+        .then(res => {
+          PushNotification.localNotification({
+            title: title,
+            message:
+              'Current Temperature: ' +
+              Math.round(res?.data?.main?.temp - 273.15).toString() +
+              '° C',
+            largeIcon: 'ic_cloud',
+          });
+        })
+        .catch(e => {
+          throw 'Unable to get Temperature';
+        });
+    }
+  };
+
+  async function checkPermission() {
+    const enabled = await firebase.messaging().hasPermission();
+    if (enabled) {
+      await getToken();
+    } else {
+      await requestPermission();
+    }
+  }
+
+  async function getToken() {
+    let fcmToken = await AsyncStorage.getItem('fcmToken');
+    console.log('FCM Token: ', fcmToken);
+    if (!fcmToken) {
+      fcmToken = await firebase.messaging().getToken();
+      if (fcmToken) {
+        // user has a device token
+        await AsyncStorage.setItem('fcmToken', fcmToken);
+      }
+    }
+  }
+
+  async function requestPermission() {
+    try {
+      await firebase.messaging().requestPermission();
+      // User has authorised
+      await getToken();
+    } catch (error) {
+      // User has rejected permissions
+      console.log('permission rejected');
+    }
+  }
 
   return (
     <Provider store={STORE}>

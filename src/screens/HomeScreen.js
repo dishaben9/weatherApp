@@ -52,7 +52,7 @@ const HomeScreen = ({navigation}) => {
             <Text style={{...FONTS.robotoRegular, fontSize: 20}}>
               {item?.name}
             </Text>
-            <Text style={{...FONTS.robotoLight, fontSize: 15, marginTop: 15}}>
+            <Text style={{...FONTS.robotoLight, fontSize: 15, marginTop: 8}}>
               {capitalize(item?.weather[0].description)}
             </Text>
           </View>
@@ -60,6 +60,7 @@ const HomeScreen = ({navigation}) => {
             {getTemperature(item?.main?.temp)}
           </Text>
         </View>
+        <View style={styles.lineSeparator} />
       </TouchableOpacity>
     );
   };
@@ -118,15 +119,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexDirection: 'row',
     paddingHorizontal: 20,
+    paddingVertical: 5,
     justifyContent: 'space-between',
-    borderBottomColor: 'black',
-    borderBottomWidth: 0.2,
   },
   mainContainer: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'white',
+  },
+  lineSeparator: {
+    height: 0.5,
+    marginTop: 5,
+    width: '100%',
+    backgroundColor: '#000',
   },
 });
 

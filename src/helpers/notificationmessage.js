@@ -1,14 +1,25 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
+import {MAP_API_KEY} from './constants';
 
 export const getTemperature = kelvin_temp => {
   return Math.round(kelvin_temp - 273.15).toString() + '° C';
 };
 
-export const getMessage = async () => {
-  const value = await AsyncStorage.getItem('TEMPERATURE');
-  if (value !== null) {
-    return `Current Temperature: ${value}° C`;
-  } else {
-    return 'Unable to get your location';
-  }
+let reqHeader = Object.assign({
+  Accept: 'application/json',
+  'Content-Type': 'application/json',
+});
+
+export const getMessage = async (lat, lon) => {
+  await axios
+    .get(
+      `http://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${MAP_API_KEY}`,
+      reqHeader,
+    )
+    .then(res => {
+      return 'Current Temperature: ' + getTemperature(res?.data?.main?.temp);
+    })
+    .catch(e => {
+      throw 'Unable to get Temperature';
+    });
 };
