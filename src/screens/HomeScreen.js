@@ -12,6 +12,7 @@ import {
 import {useDispatch} from 'react-redux';
 import {getCities} from '../redux/Actions/WeatherActions';
 import {wp, hp, FONTS} from '../helpers/theme';
+import {getTemperature} from '../helpers/notificationmessage';
 
 const HomeScreen = ({navigation}) => {
   const [weatherData, setWeatherData] = useState([]);
@@ -28,10 +29,6 @@ const HomeScreen = ({navigation}) => {
         setIsLoading(false);
       });
   }, []);
-
-  const getTemperature = kelvin_temp => {
-    return Math.round(kelvin_temp - 273.15).toString() + '° C';
-  };
 
   const capitalize = s =>
     s

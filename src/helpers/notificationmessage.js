@@ -1,5 +1,6 @@
 import axios from 'axios';
 import {MAP_API_KEY} from './constants';
+import DeviceInfo from 'react-native-device-info';
 
 export const getTemperature = kelvin_temp => {
   return Math.round(kelvin_temp - 273.15).toString() + '° C';
@@ -22,4 +23,10 @@ export const getMessage = async (lat, lon) => {
     .catch(e => {
       throw 'Unable to get Temperature';
     });
+};
+
+export const getUniqDeviceId = () => {
+  return new Promise(resolve => {
+    resolve(DeviceInfo.getUniqueId());
+  });
 };

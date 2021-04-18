@@ -12,6 +12,10 @@ import PushNotificationIOS from '@react-native-community/push-notification-ios';
 import firebase from 'react-native-firebase';
 import axios from 'axios';
 import {MAP_API_KEY} from './src/helpers/constants';
+import {db} from './firbaseConfig';
+import {getUniqDeviceId} from './src/helpers/notificationmessage';
+
+const users = db.ref('/users');
 
 const PERSIST_CONFIG = {
   key: 'root',
@@ -58,6 +62,14 @@ const App = () => {
     checkPermission();
     messageListener();
   }, []);
+
+  const storeFCM = async fcm => {
+    await getUniqDeviceId().then(res => {
+      let newObj = {};
+      newObj[res] = fcm;
+      users.push(newObj);
+    });
+  };
 
   let messageListener = async () => {
     const notificationListener = firebase
@@ -106,17 +118,23 @@ const App = () => {
         .get(
           `http://api.openweathermap.org/data/2.5/weather?lat=${parseFloat(
             latitude,
-          )}&lon=${parseFloat(longitude)}&appid=${MAP_API_KEY}`,
+          )}&lon=${parseFloat(
+            longitude,
+          )}&appid=ffb8c3decb6e7b68c36aca2d55c410ac`,
           reqHeader,
         )
         .then(res => {
+          const msg = `Current Temperature: ${Math.round(
+            res?.data?.main?.temp - 273.15,
+          ).toString()}° C`;
+          console.log(msg);
           PushNotification.localNotification({
             title: title,
-            message:
-              'Current Temperature: ' +
-              Math.round(res?.data?.main?.temp - 273.15).toString() +
-              '° C',
+            message: msg,
             largeIcon: 'ic_cloud',
+            smallIcon: 'ic_launcher',
+            playSound: true,
+            soundName: 'default',
           });
         })
         .catch(e => {
@@ -141,6 +159,8 @@ const App = () => {
       fcmToken = await firebase.messaging().getToken();
       if (fcmToken) {
         // user has a device token
+        console.log('FCM Token: ', fcmToken);
+        await storeFCM(fcmToken);
         await AsyncStorage.setItem('fcmToken', fcmToken);
       }
     }

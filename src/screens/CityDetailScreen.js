@@ -11,14 +11,11 @@ import {useSelector} from 'react-redux';
 import MapView, {PROVIDER_GOOGLE, Marker} from 'react-native-maps';
 import {color, FONTS} from '../helpers/theme';
 import Icon from 'react-native-vector-icons/Ionicons';
+import {getTemperature} from '../helpers/notificationmessage';
 
 const CityDetailScreen = ({navigation, route}) => {
   const cityData = useSelector(state => state?.weather?.cityList);
   const city = cityData.find(i => i?.id === route?.params?.cityId);
-
-  const getTemperature = kelvin_temp => {
-    return Math.round(kelvin_temp - 273.15).toString() + '° C';
-  };
 
   useLayoutEffect(() => {
     navigation.setOptions({
