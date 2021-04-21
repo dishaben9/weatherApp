@@ -58,9 +58,5 @@ buck-out/
 # CocoaPods
 /ios/Pods/
 
-# Project exclude paths
-/android/
-/ios/
-
 # Environment File
 .env
